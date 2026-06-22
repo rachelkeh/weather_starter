@@ -11,6 +11,7 @@ interface SidebarCardProps {
 
 export function SidebarCard({ location, isHome }: SidebarCardProps) {
   const { selectedId, select } = useStore();
+  const { remove } = useStore();
   const isSelected = selectedId === location.id;
   const observed = formatTime(location.weather.observed_at);
   const area =
@@ -21,6 +22,15 @@ export function SidebarCard({ location, isHome }: SidebarCardProps) {
   const low = formatTemperature(location.weather.forecast_low_c);
 
   const onSelect = () => select(location.id);
+  const onDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('Delete this location?')) return;
+    try {
+      await remove?.(location.id);
+    } catch (err) {
+      // ignore - store sets error state
+    }
+  };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
     if (event.key === 'Enter' || event.key === ' ') {
@@ -41,7 +51,15 @@ export function SidebarCard({ location, isHome }: SidebarCardProps) {
           : 'border-white/10 bg-white/[0.07] hover:bg-white/[0.12]'
       }`}
     >
-      <div className="flex items-start justify-between gap-3 px-4 pt-3">
+      <button
+        aria-label="Delete location"
+        onClick={onDelete}
+        className="absolute right-2 top-2 z-10 inline-flex h-6 w-6 items-center justify-center text-white/60 hover:text-white/80"
+        title="Delete"
+      >
+        ×
+      </button>
+      <div className="flex items-start justify-between gap-3 px-4 pt-3 pr-10">
         <div className="min-w-0">
           <div className="truncate text-lg font-semibold leading-tight text-white">{area}</div>
           <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-white/70">

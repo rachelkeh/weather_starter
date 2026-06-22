@@ -94,6 +94,13 @@ export async function getLocation(id: number): Promise<LocationRecord | null> {
   return row ? rowToRecord(row) : null;
 }
 
+export async function deleteLocation(id: number): Promise<boolean> {
+  const row = await db.select({ id: locations.id }).from(locations).where(eq(locations.id, id)).get();
+  if (!row) return false;
+  await db.delete(locations).where(eq(locations.id, id)).run();
+  return true;
+}
+
 export async function updateWeather(
   id: number,
   weather: WeatherSnapshot,
@@ -182,3 +189,12 @@ async function sqliteCallback(
   }
   return { rows: rows.map((row) => Object.values(row)) };
 }
+
+export function closeDatabase(): void {
+  try {
+    sqlite.close();
+  } catch (err) {
+    // ignore errors during close in test teardown
+  }
+}
+

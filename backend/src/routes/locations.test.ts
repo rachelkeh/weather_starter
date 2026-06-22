@@ -48,6 +48,13 @@ describe('locations API', () => {
   });
 
   afterAll(async () => {
+    // Close the database to ensure SQLite temporary files can be removed on Windows
+    try {
+      const { closeDatabase } = await import('../db.js');
+      closeDatabase();
+    } catch (err) {
+      // ignore
+    }
     await rm(tempDir, { recursive: true, force: true });
   });
 
@@ -71,5 +78,22 @@ describe('locations API', () => {
     const listResponse = await request(app).get('/api/locations').expect(200);
     expect(listResponse.body.locations).toHaveLength(1);
     expect(listResponse.body.locations[0].weather.condition).toBe('Cloudy');
+  });
+
+  it('deletes a location', async () => {
+    const response = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.36, longitude: 103.86 })
+      .expect(201);
+
+    const locationId = response.body.id;
+
+    await request(app).delete(`/api/locations/${locationId}`).expect(204);
+
+    const listResponse = await request(app).get('/api/locations').expect(200);
+    // The first test added a location; deleting the second should leave the first intact
+    expect(listResponse.body.locations).toHaveLength(1);
+    expect(listResponse.body.locations.find((l: any) => l.id === locationId)).toBeUndefined();
+    await request(app).get(`/api/locations/${locationId}`).expect(404);
   });
 });
