@@ -72,6 +72,11 @@ describe('locations API', () => {
         condition: 'Cloudy',
         area: 'Bishan',
         temperature_c: 29,
+        humidity_percent: 80,
+        rainfall_mm: 0,
+        wind_speed_knots: 4,
+        wind_direction_degrees: 180,
+        uv_index: 7,
       },
     });
 
