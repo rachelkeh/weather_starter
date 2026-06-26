@@ -41,3 +41,89 @@ input:focus-visible {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.22), transparent 36%),
+    linear-gradient(180deg, rgba(95, 125, 153, 0.82), rgba(42, 58, 76, 0.92));
+  font-family: inherit;
+}
+
+.leaflet-control-attribution {
+  background: rgba(15, 23, 42, 0.42) !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(12px);
+}
+
+.leaflet-control-attribution a {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+.weather-map-marker {
+  background: transparent;
+  border: 0;
+}
+
+.weather-map-pin {
+  display: flex;
+  width: 132px;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(-4px);
+}
+
+.weather-map-pin__label {
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.88), rgba(30, 41, 59, 0.78));
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.24);
+  backdrop-filter: blur(16px);
+}
+
+.weather-map-pin__name {
+  margin-top: 6px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(15, 23, 42, 0.55);
+  white-space: nowrap;
+}
+
+.weather-map-pin__stem {
+  height: 16px;
+  width: 1px;
+  margin-top: 5px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.22));
+}
+
+.weather-map-pin__dot {
+  height: 14px;
+  width: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  background: radial-gradient(circle at 35% 35%, #fef3c7, #fb7185 68%, #c2410c 100%);
+  box-shadow:
+    0 0 0 6px rgba(255, 255, 255, 0.12),
+    0 18px 28px rgba(15, 23, 42, 0.32);
+}
+
+.weather-map-pin--selected .weather-map-pin__label {
+  border-color: rgba(255, 255, 255, 0.52);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.92), rgba(59, 130, 246, 0.78));
+}
+
+.weather-map-pin--selected .weather-map-pin__dot {
+  background: radial-gradient(circle at 35% 35%, #ffffff, #93c5fd 55%, #2563eb 100%);
+  box-shadow:
+    0 0 0 8px rgba(147, 197, 253, 0.16),
+    0 18px 28px rgba(15, 23, 42, 0.36);
+}
