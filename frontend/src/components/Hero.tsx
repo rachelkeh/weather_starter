@@ -26,16 +26,18 @@ export function Hero() {
               </p>
             </section>
 
-            <MapCard
-              locations={locations}
-              selectedId={null}
-              onExpand={() => setIsMapOpen(true)}
-              onSelectLocation={select}
-            />
+            {locations.length > 0 && (
+              <MapCard
+                locations={locations}
+                selectedId={null}
+                onExpand={() => setIsMapOpen(true)}
+                onSelectLocation={select}
+              />
+            )}
           </div>
         </main>
 
-        {isMapOpen && (
+        {isMapOpen && locations.length > 0 && (
           <FullscreenMapModal
             locations={locations}
             selectedId={null}
