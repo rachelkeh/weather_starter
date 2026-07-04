@@ -173,6 +173,23 @@ html {
   --theme-accent: #2563eb;
 }
 
+[data-theme='microclimate'] {
+  --theme-text: rgba(17, 24, 39, 0.92);
+  --theme-text-muted: rgba(55, 65, 81, 0.74);
+  --theme-text-soft: rgba(75, 85, 99, 0.6);
+  --theme-border: rgba(148, 163, 184, 0.2);
+  --theme-border-strong: rgba(34, 197, 94, 0.28);
+  --theme-surface: rgba(255, 255, 255, 0.7);
+  --theme-surface-strong: rgba(248, 250, 252, 0.88);
+  --theme-surface-soft: rgba(241, 245, 249, 0.5);
+  --theme-surface-elevated: rgba(255, 255, 255, 0.84);
+  --theme-bg-1: #f8fafc;
+  --theme-bg-2: #e2e8f0;
+  --theme-bg-3: #cbd5e1;
+  --theme-bg-4: #94a3b8;
+  --theme-accent: #22c55e;
+}
+
 [data-theme='sunrise'] {
   --theme-bg-1: #f59e0b;
   --theme-bg-2: #fb7185;
@@ -182,6 +199,15 @@ html {
 }
 
 [data-theme='night'] {
+  --theme-text: rgba(224, 231, 255, 0.96);
+  --theme-text-muted: rgba(191, 219, 254, 0.72);
+  --theme-text-soft: rgba(148, 163, 184, 0.58);
+  --theme-border: rgba(96, 165, 250, 0.2);
+  --theme-border-strong: rgba(34, 211, 238, 0.28);
+  --theme-surface: rgba(15, 23, 42, 0.62);
+  --theme-surface-strong: rgba(30, 41, 59, 0.82);
+  --theme-surface-soft: rgba(15, 23, 42, 0.4);
+  --theme-surface-elevated: rgba(30, 41, 59, 0.92);
   --theme-bg-1: #020617;
   --theme-bg-2: #0f172a;
   --theme-bg-3: #111827;
