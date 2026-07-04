@@ -12,6 +12,7 @@ export type ThemeName =
   | 'terminal-forecast'
   | 'festival-sky'
   | 'clean-horizon'
+  | 'microclimate'
   | 'sunrise'
   | 'night';
 
@@ -34,6 +35,7 @@ export const THEMES: ThemeConfig[] = [
   { name: 'terminal-forecast', label: 'Terminal Forecast', accent: '#84cc16' },
   { name: 'festival-sky', label: 'Festival Sky', accent: '#c084fc' },
   { name: 'clean-horizon', label: 'Clean Horizon', accent: '#3b82f6' },
+  { name: 'microclimate', label: 'Microclimate', accent: '#22c55e' },
   { name: 'sunrise', label: 'Sunrise', accent: '#fb7185' },
   { name: 'night', label: 'Night', accent: '#22d3ee' },
 ];
