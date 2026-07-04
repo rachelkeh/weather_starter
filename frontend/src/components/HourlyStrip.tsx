@@ -14,11 +14,11 @@ function shortenLabel(label: string): string {
 export function HourlyStrip({ periods = [] }: HourlyStripProps) {
   if (periods.length === 0) {
     return (
-      <section className="rounded-2xl border border-white/15 bg-white/[0.08] backdrop-blur-xl">
-        <p className="border-b border-white/10 px-4 py-2 text-[12px] text-white/85">
+      <section className="rounded-2xl border backdrop-blur-xl theme-border theme-surface">
+        <p className="border-b px-4 py-2 text-[12px] theme-border theme-text">
           Forecast unavailable from this data source.
         </p>
-        <div className="flex min-h-[5rem] items-center justify-center text-sm text-white/55">
+        <div className="flex min-h-[5rem] items-center justify-center text-sm theme-text-muted">
           --
         </div>
       </section>
@@ -32,8 +32,8 @@ export function HourlyStrip({ periods = [] }: HourlyStripProps) {
   }));
 
   return (
-    <section className="rounded-2xl border border-white/15 bg-white/[0.08] backdrop-blur-xl">
-      <p className="border-b border-white/10 px-4 py-2 text-[12px] text-white/85">
+    <section className="rounded-2xl border backdrop-blur-xl theme-border theme-surface">
+      <p className="border-b px-4 py-2 text-[12px] theme-border theme-text">
         24-hour regional forecast.
       </p>
       <div
@@ -44,13 +44,13 @@ export function HourlyStrip({ periods = [] }: HourlyStripProps) {
           const isFair = slot.forecast?.toLowerCase().includes('fair');
           return (
             <div key={slot.key} className="flex flex-col items-center gap-2 px-2 py-4 text-center">
-              <div className="text-xs font-medium text-white/85">{slot.label}</div>
+              <div className="text-xs font-medium theme-text">{slot.label}</div>
               {isFair ? (
                 <SunIcon className="h-7 w-7 text-amber-300" />
               ) : (
-                <CloudIcon className="h-7 w-7 text-white/85" />
+                <CloudIcon className="h-7 w-7 theme-text" />
               )}
-              <div className="text-xs leading-snug text-white/90">{slot.forecast}</div>
+              <div className="text-xs leading-snug theme-text">{slot.forecast}</div>
             </div>
           );
         })}

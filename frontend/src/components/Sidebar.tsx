@@ -19,7 +19,7 @@ export function Sidebar() {
   }, [locations, query]);
 
   return (
-    <aside className="flex w-[22rem] shrink-0 flex-col gap-3 border-r border-white/5 bg-black/20 p-4 backdrop-blur-2xl">
+    <aside className="flex w-[22rem] shrink-0 flex-col gap-3 border-r border-white/5 bg-black/20 p-4 backdrop-blur-2xl theme-border theme-surface">
       <div className="relative">
         <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/50" />
         <input
@@ -27,7 +27,7 @@ export function Sidebar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search"
-          className="w-full rounded-lg border border-white/10 bg-white/[0.08] py-2 pl-9 pr-3 text-sm text-white placeholder:text-white/50"
+          className="w-full rounded-lg border py-2 pl-9 pr-3 text-sm placeholder:text-white/50 theme-border theme-surface theme-text"
         />
       </div>
 
@@ -35,15 +35,15 @@ export function Sidebar() {
 
       <div className="flex flex-col gap-2 overflow-y-auto pr-1">
         {isLoading && locations.length === 0 ? (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-sm text-white/70">
+          <p className="rounded-2xl border p-4 text-sm theme-border theme-surface-soft theme-text-muted">
             Loading locations…
           </p>
         ) : filtered.length === 0 && locations.length > 0 ? (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-center text-sm text-white/60">
+          <p className="rounded-2xl border p-4 text-center text-sm theme-border theme-surface-soft theme-text-muted">
             No matches
           </p>
         ) : filtered.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-white/15 bg-white/[0.04] p-6 text-center text-sm text-white/60">
+          <p className="rounded-2xl border border-dashed p-6 text-center text-sm theme-border theme-surface-soft theme-text-muted">
             No locations yet. Add one above.
           </p>
         ) : (
