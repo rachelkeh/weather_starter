@@ -27,7 +27,7 @@ export function SidebarCard({ location, isHome }: SidebarCardProps) {
     if (!confirm('Delete this location?')) return;
     try {
       await remove?.(location.id);
-    } catch (err) {
+    } catch (_err) {
       // ignore - store sets error state
     }
   };

@@ -23,7 +23,9 @@ const weather: WeatherSnapshot = {
   pm25_one_hourly: 9,
   air_quality_region: 'central',
   forecast_periods: [{ label: 'Now', forecast: 'Cloudy' }],
-  daily_forecast: [{ date: '2026-05-04', forecast: 'Cloudy', temperature_low_c: 25, temperature_high_c: 32 }],
+  daily_forecast: [
+    { date: '2026-05-04', forecast: 'Cloudy', temperature_low_c: 25, temperature_high_c: 32 },
+  ],
 };
 
 describe('locations API', () => {
@@ -52,7 +54,7 @@ describe('locations API', () => {
     try {
       const { closeDatabase } = await import('../db.js');
       closeDatabase();
-    } catch (err) {
+    } catch (_err) {
       // ignore
     }
     await rm(tempDir, { recursive: true, force: true });
@@ -98,7 +100,9 @@ describe('locations API', () => {
     const listResponse = await request(app).get('/api/locations').expect(200);
     // The first test added a location; deleting the second should leave the first intact
     expect(listResponse.body.locations).toHaveLength(1);
-    expect(listResponse.body.locations.find((l: any) => l.id === locationId)).toBeUndefined();
+    expect(
+      listResponse.body.locations.find((location: { id: number }) => location.id === locationId),
+    ).toBeUndefined();
     await request(app).get(`/api/locations/${locationId}`).expect(404);
   });
 });

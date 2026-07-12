@@ -33,7 +33,6 @@ export function StoreProvider({ children }: ProviderProps) {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- load-on-mount syncs API → React state
     load().then((next) => {
       if (next.length > 0) setSelectedId((current) => current ?? next[0].id);
     });

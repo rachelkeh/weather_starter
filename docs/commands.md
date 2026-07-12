@@ -72,7 +72,16 @@ npm run reset
 
 Clears the local SQLite database.
 
+```bash
+npm run format
+```
+
+Formats the repository with the shared root Prettier config.
+
 ## Linting
 
-There is currently no top-level lint command in `package.json`.
-If linting is added later, document the command here and wire it into the root scripts.
+```bash
+npm run lint
+```
+
+Runs ESLint across the frontend, backend, and shared TypeScript/config files.
