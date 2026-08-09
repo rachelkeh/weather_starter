@@ -53,12 +53,10 @@ function isThemeName(value: string | null): value is ThemeName {
 }
 
 export function ThemeProvider({ children }: ProviderProps) {
-  const [theme, setTheme] = useState<ThemeName>('apple');
-
-  useEffect(() => {
+  const [theme, setTheme] = useState<ThemeName>(() => {
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (isThemeName(stored)) setTheme(stored);
-  }, []);
+    return isThemeName(stored) ? stored : 'apple';
+  });
 
   useEffect(() => {
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chrome DevTools"
+  short_description: "Debug local web apps with Chrome DevTools via MCPorter"
+  default_prompt: "Use MCPorter and Chrome DevTools to inspect local web pages, capture screenshots, review network requests, and run Lighthouse audits."

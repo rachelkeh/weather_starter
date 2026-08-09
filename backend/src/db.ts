@@ -95,7 +95,11 @@ export async function getLocation(id: number): Promise<LocationRecord | null> {
 }
 
 export async function deleteLocation(id: number): Promise<boolean> {
-  const row = await db.select({ id: locations.id }).from(locations).where(eq(locations.id, id)).get();
+  const row = await db
+    .select({ id: locations.id })
+    .from(locations)
+    .where(eq(locations.id, id))
+    .get();
   if (!row) return false;
   await db.delete(locations).where(eq(locations.id, id)).run();
   return true;
@@ -193,8 +197,7 @@ async function sqliteCallback(
 export function closeDatabase(): void {
   try {
     sqlite.close();
-  } catch (err) {
+  } catch (_err) {
     // ignore errors during close in test teardown
   }
 }
-

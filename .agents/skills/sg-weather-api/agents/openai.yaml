@@ -1,0 +1,5 @@
+interface:
+  display_name: "SG Weather API"
+  short_description: "Singapore weather API workflows"
+  default_prompt: "Use $skill-sg-weather-api to work with Singapore weather API data, routes, and normalization in the weather starter app."
+
