@@ -2,8 +2,8 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import request from 'supertest';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { WeatherSnapshot } from '../weather.js';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { WeatherProviderError, type WeatherSnapshot } from '../weather.js';
 
 const weather: WeatherSnapshot = {
   condition: 'Cloudy',
@@ -31,6 +31,8 @@ const weather: WeatherSnapshot = {
 describe('locations API', () => {
   let tempDir: string;
   let app: Awaited<ReturnType<typeof import('../server.js').createApp>>;
+  let currentWeather: WeatherSnapshot;
+  let currentWeatherError: Error | null;
 
   beforeAll(async () => {
     tempDir = await mkdtemp(join(tmpdir(), 'weather-starter-test-'));
@@ -43,10 +45,18 @@ describe('locations API', () => {
       enableRequestLogging: false,
       weatherClient: {
         async getCurrentWeather() {
-          return weather;
+          if (currentWeatherError) throw currentWeatherError;
+          return currentWeather;
         },
       },
     });
+  });
+
+  beforeEach(async () => {
+    currentWeather = weather;
+    currentWeatherError = null;
+    const { resetStore } = await import('../db.js');
+    await resetStore();
   });
 
   afterAll(async () => {
@@ -156,7 +166,123 @@ describe('locations API', () => {
     expect(
       listResponse.body.locations.find((location: { id: number }) => location.id === locationId),
     ).toBeUndefined();
-    expect(listResponse.body.locations.length).toBeGreaterThan(0);
+    expect(listResponse.body.locations).toHaveLength(0);
     await request(app).get(`/api/locations/${locationId}`).expect(404);
+  });
+
+  it('rejects invalid coordinates when a location is created', async () => {
+    const missing = await request(app).post('/api/locations').send({ latitude: 1.35 }).expect(422);
+    expect(missing.body.detail).toBe('latitude and longitude are required');
+
+    const outsideSingapore = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.35, longitude: 104.5 })
+      .expect(422);
+    expect(outsideSingapore.body.detail).toContain('Coordinates must be within Singapore');
+
+    const listResponse = await request(app).get('/api/locations').expect(200);
+    expect(listResponse.body.locations).toHaveLength(0);
+  });
+
+  it('rejects exact duplicate locations', async () => {
+    await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.35, longitude: 103.85 })
+      .expect(201);
+
+    const duplicate = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.35, longitude: 103.85 })
+      .expect(409);
+
+    expect(duplicate.body.detail).toBe('Location already exists');
+  });
+
+  it('reads one location by id', async () => {
+    const created = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.34, longitude: 103.84 })
+      .expect(201);
+
+    const response = await request(app).get(`/api/locations/${created.body.id}`).expect(200);
+    expect(response.body).toMatchObject({
+      id: created.body.id,
+      latitude: 1.34,
+      longitude: 103.84,
+      weather: {
+        condition: 'Cloudy',
+        area: 'Bishan',
+      },
+    });
+  });
+
+  it('refreshes weather for an existing location', async () => {
+    const created = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.35, longitude: 103.85 })
+      .expect(201);
+
+    currentWeather = {
+      ...weather,
+      condition: 'Fair',
+      observed_at: '2026-05-04T01:00:00Z',
+      area: 'Toa Payoh',
+      temperature_c: 31,
+    };
+
+    const refreshed = await request(app)
+      .post(`/api/locations/${created.body.id}/refresh`)
+      .expect(200);
+
+    expect(refreshed.body).toMatchObject({
+      id: created.body.id,
+      weather: {
+        condition: 'Fair',
+        area: 'Toa Payoh',
+        temperature_c: 31,
+      },
+    });
+
+    const fetched = await request(app).get(`/api/locations/${created.body.id}`).expect(200);
+    expect(fetched.body.weather.condition).toBe('Fair');
+  });
+
+  it('returns 404 for missing location read, refresh, and delete requests', async () => {
+    await request(app).get('/api/locations/999').expect(404);
+    await request(app).post('/api/locations/999/refresh').expect(404);
+    await request(app).delete('/api/locations/999').expect(404);
+  });
+
+  it('keeps the created location when the initial weather refresh fails', async () => {
+    currentWeatherError = new WeatherProviderError('Weather provider temporarily unavailable');
+
+    const response = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.35, longitude: 103.85 })
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      latitude: 1.35,
+      longitude: 103.85,
+      weather: {
+        condition: 'Not refreshed',
+        source: 'not-refreshed',
+      },
+    });
+  });
+
+  it('returns 502 when refresh fails after a location already exists', async () => {
+    const created = await request(app)
+      .post('/api/locations')
+      .send({ latitude: 1.35, longitude: 103.85 })
+      .expect(201);
+
+    currentWeatherError = new WeatherProviderError('Weather provider temporarily unavailable');
+
+    const response = await request(app)
+      .post(`/api/locations/${created.body.id}/refresh`)
+      .expect(502);
+
+    expect(response.body.detail).toBe('Weather provider temporarily unavailable');
   });
 });
