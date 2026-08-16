@@ -6,6 +6,11 @@ interface LocationsResponse {
   locations: Location[];
 }
 
+interface DetectedLocationResponse {
+  location: Location;
+  reused: boolean;
+}
+
 interface ApiError {
   detail?: string;
 }
@@ -27,6 +32,12 @@ export const listLocations = () => request<LocationsResponse>('/locations');
 
 export const createLocation = (payload: CreateLocationPayload) =>
   request<Location>('/locations', { method: 'POST', body: JSON.stringify(payload) });
+
+export const detectLocation = (payload: CreateLocationPayload) =>
+  request<DetectedLocationResponse>('/locations/detect', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 
 export const refreshLocation = (id: number) =>
   request<Location>(`/locations/${id}/refresh`, { method: 'POST' });

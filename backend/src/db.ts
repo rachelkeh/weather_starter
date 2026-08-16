@@ -89,9 +89,51 @@ export async function createLocation(latitude: number, longitude: number): Promi
   return rowToRecord(row);
 }
 
+export async function findNearbyLocation(
+  latitude: number,
+  longitude: number,
+  radiusMeters = 250,
+): Promise<LocationRecord | null> {
+  const rows = await db.select().from(locations).all();
+  const nearby = rows
+    .map(rowToRecord)
+    .map((location) => ({
+      location,
+      distanceMeters: distanceInMeters(
+        latitude,
+        longitude,
+        location.latitude,
+        location.longitude,
+      ),
+    }))
+    .filter(({ distanceMeters }) => distanceMeters <= radiusMeters)
+    .sort((a, b) => a.distanceMeters - b.distanceMeters);
+
+  return nearby[0]?.location ?? null;
+}
+
 export async function getLocation(id: number): Promise<LocationRecord | null> {
   const row = await db.select().from(locations).where(eq(locations.id, id)).get();
   return row ? rowToRecord(row) : null;
+}
+
+function distanceInMeters(
+  latitudeA: number,
+  longitudeA: number,
+  latitudeB: number,
+  longitudeB: number,
+): number {
+  const earthRadiusMeters = 6_371_000;
+  const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
+  const deltaLatitude = toRadians(latitudeB - latitudeA);
+  const deltaLongitude = toRadians(longitudeB - longitudeA);
+  const latA = toRadians(latitudeA);
+  const latB = toRadians(latitudeB);
+  const haversine =
+    Math.sin(deltaLatitude / 2) ** 2 +
+    Math.cos(latA) * Math.cos(latB) * Math.sin(deltaLongitude / 2) ** 2;
+
+  return 2 * earthRadiusMeters * Math.asin(Math.sqrt(haversine));
 }
 
 export async function deleteLocation(id: number): Promise<boolean> {
