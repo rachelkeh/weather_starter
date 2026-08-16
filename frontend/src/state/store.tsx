@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import {
   listLocations,
   createLocation,
+  detectLocation,
   refreshLocation,
   deleteLocation,
   logInteraction,
@@ -61,6 +62,33 @@ export function StoreProvider({ children }: ProviderProps) {
       } catch (err) {
         setError(err);
         logInteraction('location_create_failed', {
+          latitude: payload.latitude,
+          longitude: payload.longitude,
+          error: err instanceof Error ? err.message : 'Unknown error',
+        });
+        throw err;
+      }
+    },
+    [load],
+  );
+
+  const detect = useCallback(
+    async (payload: CreateLocationPayload) => {
+      setError(null);
+      logInteraction('location_detect_submitted', payload);
+      try {
+        const result = await detectLocation(payload);
+        await load();
+        setSelectedId(result.location.id);
+        setIsAdding(false);
+        logInteraction(result.reused ? 'location_detect_reused' : 'location_detect_created', {
+          locationId: result.location.id,
+          latitude: result.location.latitude,
+          longitude: result.location.longitude,
+        });
+      } catch (err) {
+        setError(err);
+        logInteraction('location_detect_failed', {
           latitude: payload.latitude,
           longitude: payload.longitude,
           error: err instanceof Error ? err.message : 'Unknown error',
@@ -133,6 +161,7 @@ export function StoreProvider({ children }: ProviderProps) {
       if (nextIsAdding) logInteraction('location_form_opened');
     },
     create,
+    detect,
     refresh,
     remove,
   };

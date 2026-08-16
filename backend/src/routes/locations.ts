@@ -1,7 +1,8 @@
-import type { Router } from 'express';
+import type { Response, Router } from 'express';
 import { Router as createRouter } from 'express';
 import {
   createLocation,
+  findNearbyLocation,
   getLocation,
   listLocations,
   updateWeather,
@@ -36,16 +37,7 @@ export function createLocationsRouter(options: LocationsRouterOptions = {}): Rou
       const latitude = Number(request.body?.latitude);
       const longitude = Number(request.body?.longitude);
 
-      if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
-        response.status(422).json({ detail: 'latitude and longitude are required' });
-        return;
-      }
-      if (!(1.1 <= latitude && latitude <= 1.5 && 103.6 <= longitude && longitude <= 104.1)) {
-        response.status(422).json({
-          detail: 'Coordinates must be within Singapore (lat 1.1-1.5, lon 103.6-104.1)',
-        });
-        return;
-      }
+      if (!validateCoordinates(latitude, longitude, response)) return;
 
       const location = await createLocation(latitude, longitude);
 
@@ -67,6 +59,51 @@ export function createLocationsRouter(options: LocationsRouterOptions = {}): Rou
     } catch (error) {
       if (error instanceof Error && error.name === 'DuplicateLocationError') {
         logger.warn({ err: error }, 'duplicate location rejected');
+        response.status(409).json({ detail: error.message });
+        return;
+      }
+      next(error);
+    }
+  });
+
+  router.post('/locations/detect', async (request, response, next) => {
+    try {
+      const latitude = Number(request.body?.latitude);
+      const longitude = Number(request.body?.longitude);
+
+      if (!validateCoordinates(latitude, longitude, response)) return;
+
+      const existing = await findNearbyLocation(latitude, longitude);
+      if (existing) {
+        response.json({ location: existing, reused: true });
+        return;
+      }
+
+      const location = await createLocation(latitude, longitude);
+
+      try {
+        const snapshot = await weatherClient.getCurrentWeather(
+          location.latitude,
+          location.longitude,
+        );
+        const updated = await updateWeather(location.id, snapshot);
+        response.status(201).json({ location: updated ?? location, reused: false });
+      } catch (error) {
+        if (!(error instanceof WeatherProviderError)) throw error;
+        logger.warn(
+          { err: error, locationId: location.id },
+          'weather refresh failed after detected location create',
+        );
+        response.status(201).json({ location, reused: false });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === 'DuplicateLocationError') {
+        const existing = await findNearbyLocation(Number(request.body?.latitude), Number(request.body?.longitude), 1);
+        if (existing) {
+          response.json({ location: existing, reused: true });
+          return;
+        }
+        logger.warn({ err: error }, 'duplicate detected location rejected');
         response.status(409).json({ detail: error.message });
         return;
       }
@@ -123,4 +160,23 @@ export function createLocationsRouter(options: LocationsRouterOptions = {}): Rou
   });
 
   return router;
+}
+
+function validateCoordinates(
+  latitude: number,
+  longitude: number,
+  response: Response,
+): boolean {
+  if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+    response.status(422).json({ detail: 'latitude and longitude are required' });
+    return false;
+  }
+  if (!(1.1 <= latitude && latitude <= 1.5 && 103.6 <= longitude && longitude <= 104.1)) {
+    response.status(422).json({
+      detail: 'Coordinates must be within Singapore (lat 1.1-1.5, lon 103.6-104.1)',
+    });
+    return false;
+  }
+
+  return true;
 }
